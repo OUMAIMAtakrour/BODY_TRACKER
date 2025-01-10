@@ -1,3 +1,4 @@
+import { ThemedText } from "@/components/ThemedText";
 import { setItem } from "expo-secure-store";
 import React, { useState } from "react";
 import {
@@ -38,6 +39,7 @@ const App = () => {
         ></RefreshControl>
       }
     >
+      <ThemedText>hhhhh</ThemedText>
       {Items.map((object) => {
         return (
           <View style={styles.item} key={object.key}>
