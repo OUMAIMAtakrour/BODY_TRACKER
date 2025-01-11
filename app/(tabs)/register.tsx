@@ -3,9 +3,21 @@ import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { GlassView } from "@metafic-co/react-native-glassmorphism";
+import { GlassViewProps } from "@metafic-co/react-native-glassmorphism/src/GlassView";
+import { useNavigation } from "@react-navigation/native";
+type FormData = {
+  name: string;
+  email: string;
+  Age: string;
+  Nationality: string;
+  Height: string;
+  Weight: string;
+  BMI?: number;
+};
 const Register = () => {
-  const [formData, setFormData] = useState({
+  const navigation = useNavigation();
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     Age: "",
@@ -14,10 +26,28 @@ const Register = () => {
     Weight: "",
   });
 
+  const calculateBMI = () => {
+    const heightInMeters = parseFloat(formData.Height); 
+    const weightInKg = parseFloat(formData.Weight);
+    if (heightInMeters > 0 && weightInKg > 0) {
+      return weightInKg / heightInMeters ** 2;
+    }
+    return null; 
+  };
   useEffect(() => {
     loadSaveData();
   }, []);
   const loadSaveData = async () => {
+    const bmi = calculateBMI();
+    if (!bmi) {
+      Alert.alert(
+        "Error",
+        "Please enter valid height and weight to calculate BMI."
+      );
+      return;
+    }
+
+    const updatedFormData = { ...formData, BMI: parseFloat(bmi) };
     try {
       const userInfos = await AsyncStorage.getItem("formData");
       if (userInfos) {
@@ -30,11 +60,21 @@ const Register = () => {
   const savedInfos = async () => {
     try {
       await AsyncStorage.setItem("formData", JSON.stringify(formData));
-      Alert.alert("success", "data mchat");
+      Alert.alert("success", "data mchat", [
+        {
+          text: "Keep going",
+          onPress: () => navigation.navigate("setting", { formData }),
+        },
+      ]);
     } catch (error) {
       Alert.alert("Error", "ma mchat");
     }
   };
+  // const glassViewProps: GlassViewProps = {
+  //   blurRadius: 20,
+  //   backgroundColor: "rgba(255, 255, 255, 0.2)",
+  //   style: styles.body,
+  // };
   return (
     <View style={styles.container}>
       <View style={styles.body}>
@@ -109,6 +149,8 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,

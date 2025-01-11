@@ -1,37 +1,75 @@
-import { ThemedView } from "@/components/ThemedView";
-import { Stack } from "expo-router";
-import { View } from "lucide-react";
-import React from "react";
-import { StyleSheet, Text } from "react-native";
-import { Colors } from "react-native/Libraries/NewAppScreen";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Button } from "react-native";
+import { useRoute } from "@react-navigation/native";
 
-export default function Settings() {
+const Settings = () => {
+  const route = useRoute();
+  const { formData } = route.params;
+
+  const [bmi, setBmi] = useState<number | null>(null);
+
+  const calculateIbm = () => {
+    const heightInMeters = parseFloat(formData.Height) / 100;
+    const weightInKg = parseFloat(formData.Weight);
+    if (heightInMeters > 0 && weightInKg > 0) {
+      const calculateIbm = (weightInKg / heightInMeters ** 2).toFixed(2);
+      setBmi(parseFloat(calculateIbm));
+    } else {
+      setBmi(null);
+    }
+  };
+
+  if (!formData) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.error}>
+          No data found. Please fill in the form.
+        </Text>
+      </View>
+    );
+  }
+
   return (
-    <>
-      <Stack.Screen  options={{ title: "settings!" }} />
-      <ThemedView style={styles.body}>
-        <Text style={styles.text}>helloooooooooooooooooooo</Text>
-      </ThemedView>
-    </>
-  );
-}
-const styles = StyleSheet.create({
-  body: {
-    flex: 1,
-    flexDirection: "row",
-    backgroundColor: "#ffffff",
-  },
-  item: {
-    margin: 10,
+    <View style={styles.container}>
+      <Text style={styles.title}>Settings</Text>
+      <Text style={styles.text}>Name: {formData.name}</Text>
+      <Text style={styles.text}>Age: {formData.Age}</Text>
+      <Text style={styles.text}>Nationality: {formData.Nationality}</Text>
+      <Text style={styles.text}>Height: {formData.Height} cm</Text>
+      <Text style={styles.text}>Weight: {formData.Weight} kg</Text>
+      <Text style={styles.text}>Email: {formData.email}</Text>
 
-    backgroundColor: "#4ae1fa",
+      <Text style={styles.text}>
+        BMI: {bmi !== null ? bmi : "Press 'Calculate' to view BMI"}
+      </Text>
+
+      <Button title="Calculate" onPress={calculateIbm} />
+    </View>
+  );
+};
+
+export default Settings;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
     justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
   },
   text: {
-    color: "#000000",
-    fontSize: 45,
-    fontStyle: "italic",
-    margin: 10,
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  error: {
+    fontSize: 18,
+    color: "red",
+    textAlign: "center",
   },
 });
